@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>自媒体素材库自动化底座· SOP 流程说明</title>
+<style>
+  :root{
+    --bg:#ffffff; --panel:#f6f8fb; --line:#e3e8ef; --ink:#1d2129; --ink2:#4e5969; --ink3:#86909c;
+    --brand:#1f6feb; --brand-soft:#eaf2ff;
+    --ok:#0f9d58; --warn:#ff8800; --bad:#e5484d;
+    --c1:#c3dd40; --c2:#ad82f7; --c3:#b1e8fc; --c4:#ff8800;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+       font-size:15px;line-height:1.75;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px;}
+  h1{font-size:26px;margin:0 0 6px;}
+  h2{font-size:20px;margin:44px 0 14px;padding-left:10px;border-left:4px solid var(--brand);}
+  h3{font-size:16px;margin:24px 0 10px;color:var(--ink);}
+  p{margin:8px 0;}
+  .sub{color:var(--ink3);font-size:13px;}
+  .lead{background:var(--brand-soft);border:1px solid #d3e3ff;border-radius:10px;padding:14px 16px;margin:16px 0;}
+  nav{position:sticky;top:0;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);
+      padding:10px 0;z-index:5;backdrop-filter:blur(6px);}
+  nav a{display:inline-block;margin-right:14px;color:var(--brand);text-decoration:none;font-size:14px;}
+  nav a:hover{text-decoration:underline;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0;}
+  table{border-collapse:collapse;table-layout:fixed;width:100%;font-size:14px;margin:12px 0;}
+  col.c1{width:14%} col.c2{width:22%} col.c3{width:32%} col.c4{width:32%}
+  th,td{border:1px solid var(--line);padding:9px 11px;vertical-align:top;word-break:break-word;}
+  th{background:#eef2f7;text-align:left;font-weight:600;}
+  code{background:#f0f2f5;border-radius:4px;padding:1px 5px;font-size:13px;
+       font-family:Consolas,"Courier New",monospace;word-break:break-all;}
+  pre{background:#1e2430;color:#e6edf3;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;}
+  .copybox pre{white-space:pre-wrap;word-break:break-word;}
+  pre code{background:none;color:inherit;padding:0;}
+  .tag{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;color:#1d2129;}
+  .t1{background:var(--c1)} .t2{background:var(--c2)} .t3{background:var(--c3)} .t4{background:var(--c4);color:#fff}
+  .pill{display:inline-block;border-radius:999px;padding:1px 10px;font-size:12px;border:1px solid var(--line);color:var(--ink2);}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  .step{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0;background:#fff;}
+  .step .no{display:inline-block;min-width:26px;height:26px;line-height:26px;text-align:center;
+            border-radius:50%;background:var(--brand);color:#fff;font-size:13px;margin-right:8px;}
+  .step h4{margin:0 0 6px;font-size:16px;display:inline-block;}
+  .kv{color:var(--ink2);font-size:14px;}
+  .kv b{color:var(--ink);font-weight:600;}
+  ul{margin:8px 0;padding-left:22px;} li{margin:4px 0;}
+  .flowbox{background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:18px;overflow-x:auto;}
+  .var{background:#fff7e6;border:1px dashed #ff8800;border-radius:5px;padding:0 5px;color:#a85800;font-weight:600;}
+  .varbox{background:#fffaf0;border:1px dashed #ff8800;border-radius:12px;padding:14px 18px;margin:14px 0;}
+  .varbox h3{margin-top:0;color:#a85800;}
+  .rst{background:#f3f6ff;border-left:4px solid var(--brand);padding:8px 12px;margin:10px 0;font-size:14px;}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink3);font-size:13px;}
+
+  /* 左侧目录布局 */
+  .wrap{max-width:1180px;}
+  .layout{display:flex;gap:28px;align-items:flex-start;}
+  .sidebar{position:sticky;top:16px;flex:0 0 236px;width:236px;max-height:calc(100vh - 32px);overflow:auto;
+          background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 12px;}
+  .sidebar .sdtitle{font-size:13px;color:var(--ink3);margin:2px 0 8px 6px;}
+  .sidebar a{display:block;padding:6px 8px;border-radius:8px;color:var(--ink2);text-decoration:none;font-size:14px;line-height:1.5;}
+  .sidebar a:hover{background:#eef3fb;color:var(--brand);}
+  .sidebar a.lv1{font-weight:600;color:var(--ink);margin-top:8px;}
+  .sidebar a.lv2{padding-left:20px;font-size:13px;}
+  .main{flex:1;min-width:0;}
+  @media (max-width:900px){
+    .layout{display:block}
+    .sidebar{position:static;width:auto;max-height:none;margin-bottom:18px}
+  }
+  /* 步骤卡增强 */
+  .step{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .steptop{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .step h4{margin:0;}
+  .why{background:#fff8ec;border-left:4px solid var(--warn);padding:8px 12px;border-radius:0 8px 8px 0;font-size:14px;margin:8px 0;}
+  .do{font-size:14px;margin:8px 0;}
+  .copybox{border:1px solid #cdd7e5;border-radius:10px;overflow:hidden;margin:10px 0;}
+  .copyhd{display:flex;justify-content:space-between;align-items:center;background:#eef2f7;
+          padding:6px 10px;font-size:13px;color:var(--ink2);}
+  .copybox pre{margin:0;border-radius:0;background:#1e2430;}
+  .copybtn{border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 10px;font-size:12px;cursor:pointer;color:var(--brand);}
+  .copybtn:hover{background:var(--brand-soft);}
+  .kv b.done{color:var(--ok);}
+  .tocmini{background:#f8fafc;border:1px dashed var(--line);border-radius:10px;padding:10px 14px;font-size:14px;margin:12px 0;}
+  .routes{display:flex;gap:14px;margin:14px 0;}
+  .route{flex:1;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;display:block;text-decoration:none;}
+  .route.lazy{border-color:var(--brand);background:var(--brand-soft);}
+  .route .rt-title{font-weight:700;font-size:15px;margin-bottom:6px;color:var(--ink);}
+  .route .rt-title .pill{margin-left:6px;}
+  .route .rt-desc{font-size:13px;color:var(--ink2);line-height:1.6;}
+  .route:hover{border-color:var(--brand);text-decoration:none;}
+  @media (max-width:700px){.routes{display:block}.route{margin-bottom:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="sdtitle">目录 · 点标题直接跳</div>
+  <a class="lv1" href="#intro">📖 先看懂：这套东西在干嘛</a>
+  <a class="lv2" href="#things">它靠哪三样东西运转</a>
+  <a class="lv1" href="#setup">🚀 部署安装（一次性）</a>
+  <a class="lv2" href="#lazy">路线 A · 懒人版（复制一段话）</a>
+  <a class="lv2" href="#steps">路线 B · 一步一步版（Step 0–8）</a>
+  <a class="lv2" href="#dod">✅ 验收清单</a>
+  <a class="lv1" href="#vars">⚙️ 改配置：可变量地图</a>
+  <a class="lv1" href="#pipes">⓪ 入口流水线</a>
+  <a class="lv1" href="#cols">① 表格列名对照</a>
+  <a class="lv1" href="#flow">② 改写主流程</a>
+  <a class="lv1" href="#howto">③ 四条链路怎么做</a>
+  <a class="lv1" href="#tpl">③B 稿件章节模板</a>
+  <a class="lv1" href="#gate">④ 闸门与验收</a>
+  <a class="lv1" href="#pit">⑤ 坑与排障</a>
+  <a class="lv1" href="#const">⑥ 常量表</a>
+</aside>
+<main class="main">
+<h1>自媒体素材库自动化底座· SOP 流程说明</h1>
+<div class="sub">🧩 <b>这是底座版</b>：流程是通用的，所有「跟人/账号绑定」的地方都标成 <span class="var">⚙️ 可变量</span>，复制一份改掉即可变成你自己的流水线。<br>
+一页讲清两件事：<b>素材怎么自动进来</b>（三条定时抓取流水线 + 微信手动转发），以及<b>素材怎么变成一篇能发的稿</b>。<br>
+最后更新：2026-10-15（① 助理入库加「取源优先级：抖音 ＞ 小红书 ＞ 视频号」；② 全页脱敏：真人名号 / 真实 token / 真实路径 / 真实黑白名单词条一律换成 ⬜ 占位变量）
+<div class="rst" style="margin-top:8px">🔴 <b>分享前自查（本页要发给别人看）</b>：全页<b>不得出现任何具体人名 / 账号人设名 / 真实 spreadsheet_token / 真实 sheet_id / 真实自动化 ID / 带系统用户名的路径 / 实际选题黑白名单词条</b>。这些一律是 ⚙️ 可变量，用 <code>{作者}</code>、<code>{素材表ID}</code>、<code>{定时自动化ID}</code>、<code>{工作目录}</code>、<code>⬜ 待填</code> 代替。自查方式：全文搜索一遍上面这几类真实值，命中任何一处就替换成占位变量。</div>
+</div>
+
+<nav>
+  <a href="#setup">🚀 部署安装（懒人版 / 一步一步版）</a>
+  <a href="#vars">⚙️ 改配置（可变量地图）</a>
+  <a href="#pipes">⓪ 入口流水线</a>
+  <a href="#cols">① 表格列名对照</a>
+  <a href="#flow">② 改写主流程</a>
+  <a href="#howto">③ 四条链路怎么做</a>
+  <a href="#tpl">③B 稿件章节模板</a>
+  <a href="#gate">④ 闸门与验收</a>
+  <a href="#pit">⑤ 坑与排障</a>
+  <a href="#const">⑥ 常量表</a>
+</nav>
+
+<h2 id="intro">📖 先看懂：这套东西到底在干嘛</h2>
+<div class="lead">
+<b>说人话就一句话：</b>把「别人发得好内容」自动变成「你自己能直接发的稿」。<br><br>
+<b>它每天是这样运转的：</b><br>
+① <b>素材进来</b>——要么你在微信上刷到一条转发给助理，要么机器人每天定时去扒对标博主的新视频/行业资讯；<br>
+② <b>登记</b>——进飞书表格，标上平台、类型（视频/图文/文章）、标题、链接；<br>
+③ <b>把内容取出来</b>——视频就下载 + 转写成文字，文章就抓正文；<br>
+④ <b>按你的语气重写</b>——不是复制粘贴，是换了 Hook、换了结构、换了结尾的一篇新稿；<br>
+⑤ <b>存成飞书文档 + 表格打橙标</b>——你打开表，看见橙色的「已改写待审核」，点进去审稿。<br><br>
+<b>所以你每天真正要做的只有一件事：审橙标的稿，通过后发出去。</b>
+</div>
+
+<h3 id="things">它靠三样东西撑起来（缺一个就转不动）</h3>
+<table>
+  <colgroup><col style="width:18%"><col style="width:36%"><col style="width:46%"></colgroup>
+  <tr><th>角色</th><th>是谁</th><th>负责哪一段</th></tr>
+  <tr><td><b>🧠 大脑</b></td><td>本 skill<br><span class="sub">（自媒体素材库自动化底座）</span></td><td>定规则：素材怎么登记、按什么格式改写、写到哪张表、什么算完成。<b>它也依赖下面那个「手脚」。</b></td></tr>
+  <tr><td><b>🦾 手脚</b></td><td><code>博主视频全量扒取</code> skill<br><span class="sub">（采集底座，见 Step 0）</span></td><td>真干活：下载视频、抽音频、Whisper 转写成字、各平台取流。没有它，视频类素材一步都走不动。</td></tr>
+  <tr><td><b>📦 仓库</b></td><td>飞书表格 + 知识库<br><span class="sub">（素材表 / 资讯表 / 文档）</span></td><td>存素材、存改写稿、存进度。表里一屏看清状态，稿子在知识库里能直接编辑。</td></tr>
+</table>
+<div class="rst">⚠️ <b>常见误解：</b>本 skill <b>不是</b>采集工具。它调用「博主视频全量扒取」skill 去扒内容（含 MediaCrawler 与各平台脚本），自己只管「选题 → 改写 → 入库」。所以<b>部署第一步就是确认采集底座在不在</b>。</div>
+
+<div class="tocmini"><b>接下来你要做的事就两步：</b><br>
+<b>① 部署一次</b>（下面「🚀 部署安装」，一次性，半小时到一小时）<br>
+<b>② 以后只用</b>：微信转发素材 / 等定时任务跑 / 审橙标稿子。<br>
+想省事 → 走<b>路线 A 懒人版</b>（复制一段话给 Agent）；想搞懂每一步 → 走<b>路线 B 一步一步版</b>（Step 0–8）。</div>
+
+<h2 id="setup">🚀 部署安装（一次性，半小时到一小时）</h2>
+<div class="rst">🛑 <b>第一闸门：先问后做（看到这里先停下来）</b><br>
+本页是<b>模板</b>。里面所有 ⚙️ / ⬜ / <code>{作者}</code> / <code>{素材表ID}</code> 都是<b>占位</b>，不是可用的真实配置。<b>必须先向用户提问、等其逐项填写、复述确认后，才允许进入下面任何一步</b>；<span class="bad">严禁拿示例值直接开跑采集 / 改写 / 入库</span>。<br>
+提问时<b>一次性把整张待确认清单发全</b>（见下方「待确认清单」），不要一条一条挤牙膏；用户明确说「用示例值 / 帮我定」的项才可按示例执行，并标 ⬜ 待替换。
+</div>
+
+<div class="card">
+<table>
+  <colgroup><col style="width:16%"><col style="width:84%"></colgroup>
+  <tr><th>🔴 硬门槛<br>（没填不许继续）</th><td>① <b>作者人设 / 账号归属</b>：这个 skill 服务谁？人设名或称呼是什么？<br>② <b>内容赛道 / 主题方向</b>：一句话说清（决定选题黑白名单、信源、栏目词表）。<br>⚠️ 这两项决定所有稿件的语气与筛选口径，缺了必然写出「别人的稿」。</td></tr>
+  <tr><th>⚙️ 有默认值的<br>（用户说「用示例」即可）</th><td>③ 内容栏目词表 ④ 选题白名单 ⑤ 选题黑名单 ⑥ 时间窗与热度阈值 ⑦ 信源清单 ⑧ 三条流水线的定时时间 ⑨ 脚本目录 ⑩ 完成情况标签与颜色</td></tr>
+  <tr><th>流程卡点</th><td>发问 → <b>等</b> → 收到填写 → <b>复述一遍确认</b> → 才开始执行。每一步做完回报结果，等用户确认再进下一步（扫码类操作只能由用户本人完成）。</td></tr>
+</table>
+</div>
+
+<div class="ok">✅ <b>怎么算走对闸门：</b>动手之前，文档里已经能看到用户亲口填的作者人设与内容赛道，且用户回复过「确认」。</div>
+
+<div class="rst">两条路选一条，装的<b>是同一套东西</b>：<b>想省事 → 路线 A 懒人版</b>（复制一整段话，Agent 按 Step 0–8 带你装完）；<b>想搞懂每步 / 出问题要排查 → 路线 B 一步一步版</b>（每步拆成「为什么 → 你要做什么 → 💬 复制给 Agent → ✅ 怎么确认」四段）。</div>
+<div class="routes">
+  <a class="route lazy" href="#lazy">
+    <div class="rt-title">🅰️ 路线 A · 懒人版 <span class="pill">推荐</span></div>
+    <div class="rt-desc">不关心每个 Step 的细节 → 复制一整段话发给 Agent，它按 Step 0–8 带你装完。全程你只做「扫码、确认」。</div>
+  </a>
+  <a class="route" href="#steps">
+    <div class="rt-title">🅱️ 路线 B · 一步一步版</div>
+    <div class="rt-desc">想看清每步在干嘛、装到一半要排查 → 从 Step 0 到 Step 8 逐条跟着走，每步独立可复制。</div>
+  </a>
+</div>
+
+<h3 id="lazy">🅰️ 路线 A · 懒人版：复制这整段直接发给 Agent</h3>
+<div class="copybox"><div class="copyhd"><span>🚀 懒人版：复制这整段直接发给 Agent，它会按 8 步带你装完</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div>
+<pre><code>我要用「自媒体素材库自动化底座」skill 搭一套自动化选题流水线。
+请打开这个 skill 的 SOP 页（SOP流程说明-底座版.html），按开头「部署安装 Step 0-8」帮我逐部署，每步做完先回报结果、等我确认再进下一步。
+
+⚠️ 全程总规则（最重要）：凡是要填的变量——我的名字/账号归属、表名、token、路径、定时时间、赛道关键词——【一律不要用文档里的示例值】，先收集我的信息再动手：部署开始前，先一次性问我要「Step 1 变量清单」（见 SOP 页）里还没确定的项，我答完你再继续。
+
+Step 0 确认采集底座「博主视频全量扒取」已内置在本包 扒取/ 目录（含 SKILL.md / scripts/ / references/），并跑一条视频元数据做验证。
+Step 1 把底座复制成我自己的 skill：先问我要「skill 名字」和「账号归属」，再复制改名替换，改完让我确认 5 个必需文件都在。
+Step 2 逐项检查本地环境五项：Python 3.12、ffmpeg、faster-whisper large-v3（离线可用）、Playwright + Edge、lark-cli。缺哪项装哪项，装完复验并把结果列表给我。
+Step 3 带我做飞书授权：lark-cli auth login --no-wait --json，把授权链接给我（要二维码就用 Python qrcode 生成并回读验证，不要手动给 URL 加引号）。
+Step 4 在飞书建表格「我的自媒体素材库」，按表头清单建 4 类子表并写入首行（中文必须用 sheets +cells-set 写），把 spreadsheet_token 和各 sheet_id 给我。
+Step 5 建知识库空间和「改写稿」父节点，把 space_id 和 node_token 给我，并建一篇测试文档验证能挂上去。
+Step 6 给素材表完成情况列设 4 个带色下拉标签（已改成图文/已改成视频/已改成文章/已改写待审核）。
+Step 7 提醒我：这一步我本人去扫码开通微信助理，不用来帮我做。
+Step 8 先跑一次最小闭环（我随后发你一条素材链接），跑通后再帮我建三个定时任务（跨境资讯周采集 每周五 08:30、AI 资讯周采集 每周五 08:35、对标博主周采集 每周五 09:00），prompt 里所有表名和 token 换成我这边的真实值，采集窗口必须写「最近 7 天」。
+
+全部做完后，把这张表给我：配置项 / 我的真实值，方便我以后改。</code></pre></div>
+
+<div class="kv"><b>⚙️ Agent 会问你的变量（Step 1 变量清单）：</b>① skill 名字（如「小王-自媒体选题」）② 账号归属（你的名字/人设名）③ 内容赛道（AI 办公 / 跨境 / 美妆……决定选题黑白名单和信源）。其余 token、路径、定时时间由 Agent 在后续步骤里现做现拿，<b>不需要你提前准备</b>。</div>
+
+<h3 id="steps">🅱️ 路线 B · 一步一步版（Step 0–8，每步四段）</h3>
+<div class="rst">适合想搞清楚每步在干嘛、或装到一半出问题要对症排查的人。命令都让 Agent 敲，你只做「扫码、确认」这类给人做的操作。装完用下面那张<b>✅ 验收清单</b>逐项对照。</div>
+<div class="step" id="s0">
+<div class="steptop"><span class="no">0</span><h4>确认采集底座已内置「博主视频全量扒取」</h4></div>
+<div class="why"><b>为什么先做这步：</b>本 skill 是「大脑」，只负责规则和改写；<b>真正去平台上把视频和正文抓下来、把语音转成文字的，是「博主视频全量扒取」这个 skill</b>（它内部带 MediaCrawler、各平台脚本和 Whisper 转写）。它是发动机，<b>已内置在本包 <code>扒取/</code> 目录</b>，后面所有视频类素材都靠它。</div>
+<div class="do"><b>你要做的：</b>确认本包 <code>扒取/</code> 目录里 <code>SKILL.md</code> + <code>scripts/</code> + <code>references/</code> <b>三部分齐全</b>（只复制 SKILL.md 过来会报「脚本找不到」）。<br>
+<b>采集底座已随本包内置，无需再从 GitHub 单独下载。</b><br>
+<div class="rst" style="margin-top:6px">采集底座文件（SKILL.md / scripts / references）<b>已随本包内置</b>；<b>Whisper 模型缓存、登录态、浏览器 profile 不上传</b>，装机后跑一次就有。</div></div>
+<div class="copybox"><div class="copyhd"><span>💬 Step 0 · 复制给 Agent</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>帮我确认采集底座「博主视频全量扒取」已内置在本包 扒取/ 目录（SKILL.md、scripts/、references/ 三部分齐全）；
+然后跑一次最小验证：抓 1 条小红书视频的元数据（只要元数据，先不下载），把结果和路径一起回报给我。</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b>目录三个部分齐全 + 能返回 1 条视频元数据（有标题/点赞数）。</div>
+</div>
+
+<div class="step" id="s1">
+<div class="steptop"><span class="no">1</span><h4>把底座复制成你自己的 skill</h4></div>
+<div class="why"><b>为什么：</b>底座是通用模板，可能同时服务好几个人。你要的是「只服务你自己」的那一份——它会在 <code>roles.md</code> 里记住你的语气、在 SKILL.md 里记住你的表名。<b>不要直接改底座本身</b>，改了别人就没法用了。</div>
+<div class="do"><b>你要做的：</b>不用手填任何路径。<b>直接说「基于这个底座给我装一份」，Agent 会反过来问你叫什么名字、账号归属写谁</b>——你答完它自己完成复制、改名、替换。</div>
+<div class="copybox"><div class="copyhd"><span>💬 Step 1 · 复制给 Agent（一句话就够，剩下的它问你答）</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>请基于「自媒体素材库自动化底座」给我安装我自己的版本。
+规则：不要用文档里的示例值——先列一份「需要我提供 / 需要我修改的变量清单」问我（至少包括：skill 名字、账号归属、内容赛道），我回答后再动手：
+复制底座目录成我的 skill → 按我的回答改 SKILL.md 顶部 name 和全文账号归属 → 改完列出目录，确认 5 项都在：SKILL.md、SOP流程说明-底座版.html、00-SOP-自媒体素材库全流程.md、使用说明.md、references/ 文件夹。</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b>新开一个对话，能选到你这个新 skill。</div>
+</div>
+
+<div class="step" id="s2">
+<div class="steptop"><span class="no">2</span><h4>本地环境五项（缺一个，链条就断在那）</h4></div>
+<div class="why"><b>为什么：</b>改写的活儿全靠本机程序干：<b>Python</b> 跑脚本、<b>ffmpeg</b> 抽音频、<b>Whisper</b> 把话转成字、<b>Edge</b> 打开网页取视频流、<b>lark-cli</b> 读写飞书。这五项像流水线上的五台机器，哪台没通电，料就卡在那。</div>
+<table>
+  <colgroup><col style="width:22%"><col style="width:44%"><col style="width:34%"></colgroup>
+  <tr><th>要装什么</th><th>说明（为什么要它）</th><th>验证命令</th></tr>
+  <tr><td><b>Python 3.12</b></td><td>必须是 3.12（3.13 有包装不上）；跑所有脚本</td><td><code>python --version</code></td></tr>
+  <tr><td><b>ffmpeg</b></td><td>视频抽音频、切片段</td><td><code>ffmpeg -version</code></td></tr>
+  <tr><td><b>faster-whisper + large-v3</b></td><td>本地转写，不开云端、不限量；必须离线缓存</td><td><code>HF_HUB_OFFLINE=1</code> 下能加载模型</td></tr>
+  <tr><td><b>Playwright + Edge</b></td><td>开网页抓内容；只准 Edge，不准用真实浏览器 profile</td><td><code>channel="msedge"</code> 能无头开页</td></tr>
+  <tr><td><b>lark-cli</b></td><td>所有飞书读写（建表、写文档、回写表格）都走它</td><td><code>lark-cli --version</code></td></tr>
+</table>
+<div class="copybox"><div class="copyhd"><span>💬 Step 2 · 复制给 Agent</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>请检查我这台机器的运行环境，五项逐项验证并存一份结果列表给我：
+1) Python 版本是否 >= 3.12 且 < 3.13；
+2) ffmpeg -version 是否有输出；
+3) Python 里能否 import faster_whisper，且 large-v3 模型缓存已在本地（HF_HUB_OFFLINE=1 能加载）；
+4) Playwright 是否已安装、能否用 channel="msedge" 无头打开网页；
+5) lark-cli --version 是否有输出。
+缺哪项就帮我装哪项，装完再复验一遍。五项全绿再进下一步。</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b>Agent 回报的五项列表全是「通」。<b>有一项没通不要往下走。</b></div>
+</div>
+
+<div class="step" id="s3">
+<div class="steptop"><span class="no">3</span><h4>飞书授权（给 Agent 一把钥匙）</h4></div>
+<div class="why"><b>为什么：</b>素材表和稿子都存在<b>你的飞书</b>里。Agent 想读写，得先拿到你的授权。这一步做完，后面才能建表、写文档。</div>
+<div class="do"><b>你要做的：</b>只有一件事——<b>手机飞书扫码</b>。链接 10 分钟内有效，过期重跑。</div>
+<div class="copybox"><div class="copyhd"><span>💬 Step 3 · 复制给 Agent</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>帮我做飞书授权：
+1) 运行 lark-cli auth login --no-wait --json，把授权链接给我；
+2) 如果我需要扫码图，用 Python 的 qrcode 库生成（生成后必须回读解码，确认内容和我给的 URL 完全一致）——不要给 URL 手动加引号，那会让二维码扫不出来；
+3) 授权完成后跑 lark-cli auth status，把当前登录用户告诉我。</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b><code>lark-cli auth status</code> 有登录用户；随便读一次表格能返回子表列表。</div>
+</div>
+
+<div class="step" id="s4">
+<div class="steptop"><span class="no">4</span><h4>建飞书表格 + 表头</h4></div>
+<div class="why"><b>为什么：</b>表头 = 你和 Agent 之间的「字段合同」。素材往哪一列写、进度看哪一列、稿件链接贴哪一列，全由首行决定。<b>表头建错或顺序不对，后面写进去的数据就是乱的</b>——所以这一步宁慢勿错，建完必须回读。</div>
+<div class="do"><b>你要做的：</b>告诉 Agent 你要哪几张表（用不到就别建），然后<b>核对回读出来的表头</b>。</div>
+<table>
+  <colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+  <tr><th>表（建几张看你用几条流水线）</th><th>首行表头（按顺序，从 A 列起）</th></tr>
+  <tr><td><b>① 素材总表</b><br><span class="sub">转发 / 周采集都落这</span></td><td>序号 · 账号归属 · 平台 · <b>类型</b> · 内容栏目 · 标题 · 链接 · 口播逐字稿改写 · 是否符合改写 · 迫切程度 · <b>完成情况</b> · 发布情况</td></tr>
+  <tr><td><b>② 对标博主表</b><br><span class="sub">周采集读名单用</span></td><td>序号 · 账号归属 · 平台 · ID · 主页链接 · 对标标签 · 备注</td></tr>
+  <tr><td><b>③ 周采集结果表</b></td><td>视频扒取日期 · 账号归属 · 平台 · 博主ID · 视频链接/截图 · 视频标题 · 视频逐字稿/文案 · 改写口播稿/改写文案 · 完成情况</td></tr>
+  <tr><td><b>④ 两张资讯表</b><br><span class="sub">分开建，不许交叉写</span></td><td>新闻日期 · 新闻链接 · 新闻内容 · 选题方向 · 文字稿 · 口播稿 · 完成情况</td></tr>
+</table>
+<div class="copybox"><div class="copyhd"><span>💬 Step 4 · 复制给 Agent</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>在飞书给我建一套表：
+1) 新建电子表格「我的自媒体素材库」；
+2) 按 SOP 页「Step 4」那张表头清单建 4 类子表，并写入各自首行表头；
+3) 中文表头必须用 sheets +cells-set 写（+csv-put 会吃掉中文首字）；
+4) 建完把 spreadsheet_token 和每个 sheet_id 列给我，并回读首行让我核对字和顺序。</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b>回读出来的首行，和你要求的<b>一个字都不差、顺序一致</b>。</div>
+</div>
+
+<div class="step" id="s5">
+<div class="steptop"><span class="no">5</span><h4>建知识库节点（稿子的家）</h4></div>
+<div class="why"><b>为什么：</b>改写稿是两三千字的长文，<b>塞不进表格单元格</b>（会截断、也没法排版）。所以稿子建成飞书文档放在知识库里，表格里只放一个链接。这个「稿子都放哪」的位置就叫父节点。</div>
+<div class="copybox"><div class="copyhd"><span>💬 Step 5 · 复制给 Agent</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>帮我建飞书知识库：
+1) lark-cli wiki +space-create 建空间「我的自媒体素材库」；
+2) wiki +node-create 在该空间下建父节点「改写稿」；
+3) wiki +node-list 把 space_id 和父节点 node_token 给我；
+4) 在该节点下建一篇测试文档，确认我能点开看到。</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b>拿到 <code>node_token</code>，且以后 <code>docs +create --parent-token &lt;node_token&gt;</code> 建的文档都能在这节点下看到。</div>
+</div>
+
+<div class="step" id="s6">
+<div class="steptop"><span class="no">6</span><h4>设「完成情况」下拉（红绿灯）</h4></div>
+<div class="why"><b>为什么：</b>这张表你每天会扫一眼。<b>橙色的「已改写待审核」就是信号灯</b>——没做成下拉+上色，它就只是灰扑扑的文字，你没法一眼看出哪些等着你审。</div>
+<div class="copybox"><div class="copyhd"><span>💬 Step 6 · 复制给 Agent</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>给素材表的完成情况列（K2:K500）设下拉：
+options = ["已改成图文","已改成视频","已改成文章","已改写待审核"]
+colors  = ["#c3dd40","#ad82f7","#b1e8fc","#ff8800"]
+开多选（--multiple true）和高亮（--highlight true）。
+注意：这一列如果已经有下拉，重设时四个值必须一起传，否则会被截断成三个。</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b>点单元格能看到 4 个彩色选项；Agent 每出一篇稿都自动打 <span class="tag t4">已改写待审核</span>。</div>
+</div>
+
+<div class="step" id="s7">
+<div class="steptop"><span class="no">7</span><h4>开通微信助理（⚠️ 必须你本人扫码）</h4></div>
+<div class="why"><b>为什么：</b>这是「素材怎么进来」最省事的口子——<b>手机上刷到好内容 → 微信分享给助理 → 剩下全自动</b>。不做这步也能跑（定时任务照常），但你手动投喂就得回来开电脑。</div>
+<div class="do"><b>你自己做的事（Agent 代替不了）：</b><br>
+① WorkBuddy 左侧「助理」→ 齿轮「助理设置」→ ② 找到「微信助理集成」点「配置」→ ③ 手机微信扫码 → 状态变「已绑定」→ ④ 发一条分享卡片测试。<br>
+<span class="sub">前置：WorkBuddy ≥ 4.6.4 ｜ 微信 ≥ 8.0.70 ｜ 同一账号 ｜ <b>电脑保持开机、WorkBuddy 运行中</b>（关了就收不到）。</span></div>
+<div class="copybox"><div class="copyhd"><span>💬 Step 7 · 扫码完成后，把这句发给 Agent 测试链路</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>我刚绑定好微信助理。我现在从微信给你发一条小红书分享。
+请你收到后：读出里面的原始链接（注意保留完整的 xsec_token，不要清洗掉），
+按 skill 规则在素材表登记这一行，把「平台/类型/标题/链接」四列回读给我确认。</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b>表里多一行，链接完整能点开。</div>
+</div>
+
+<div class="step" id="s8">
+<div class="steptop"><span class="no">8</span><h4>先跑一次最小闭环，再挂定时任务</h4></div>
+<div class="why"><b>为什么先跑闭环：</b>定时任务一旦挂上就每天自动跑，<b>如果链路本身有问题，它会每天给你一堆废数据</b>。所以先手动跑一条，确认「抓→改写→闸门→建档→回写」全通，再让它自动化。</div>
+<div class="do"><b>你要做的：</b>挑一条真实素材（小红书优先，公众号容易被反爬挡）发给 Agent；跑通后再让它建三个定时任务。</div>
+<table>
+  <colgroup><col style="width:26%"><col style="width:26%"><col style="width:48%"></colgroup>
+  <tr><th>定时任务</th><th>建议时间</th><th>要点</th></tr>
+  <tr><td>跨境资讯周采集</td><td><b>每周五 08:30</b></td><td rowspan="2">两张资讯表<b>各一个独立任务</b>，prompt 里写死只写自己那张，避免抢同一张表；采集窗口 = <b>最近 7 天</b>；判「是」的<b>每次最多改写 12 条</b>，超出排队下次优先</td></tr>
+  <tr><td>AI 资讯周采集</td><td><b>每周五 08:35</b></td></tr>
+  <tr><td>对标博主周采集</td><td>每周五 09:00</td><td>博主串行、随机间隔，<b>严禁并发</b>；遇到验证码立即停手</td></tr>
+</table>
+<div class="copybox"><div class="copyhd"><span>💬 Step 8 · 复制给 Agent（把链接换成你的）</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>先跑一次最小闭环：我用这条素材 &lt;在这里贴一条小红书/公众号链接&gt;。
+请你走完整条链路并逐步回报：抓内容 → 判定类型（视频/图文/文章）→ 视频的话下载+转写 → 按人设改写 → 跑 qa_check 闸门 → 建成一个飞书文档（挂在父节点下）→ 在素材表回写：文档链接列贴卡片、完成情况列打「已改写待审核」→ 最后回读确认文档打得开、内容完整。
+
+跑通之后，再帮我建三个定时任务（跨境资讯周采集 每周五 08:30、AI 资讯周采集 每周五 08:35、对标博主周采集 每周五 09:00），
+prompt 直接用本 skill SOP 页「⓪ 入口流水线」里各卡片的现成模板，但要把里面所有表名、token、脚本路径替换成我这边的真实值。</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b>闭环七步全通 + 三个任务出现在自动化列表里。</div>
+</div>
+
+<h3 id="dod">✅ 部署验收清单（全绿才算装好）</h3>
+<table>
+  <colgroup><col style="width:26%"><col style="width:40%"><col style="width:34%"></colgroup>
+  <tr><th>检查项</th><th>怎么验</th><th>通过标准</th></tr>
+  <tr><td>采集底座可用</td><td>抓 1 条视频元数据</td><td>scripts/ + references/ 齐全，能返回数据</td></tr>
+  <tr><td>skill 可调用</td><td>新对话能选到它</td><td>5 个必需文件都在</td></tr>
+  <tr><td>本地环境五项</td><td>各跑一次</td><td>Python/ffmpeg/Whisper/Edge/lark-cli 全通</td></tr>
+  <tr><td>飞书授权</td><td><code>auth status</code> + 读一次表</td><td>能读出子表列表</td></tr>
+  <tr><td>表头就位</td><td>回读首行</td><td>顺序一致、无错字</td></tr>
+  <tr><td>下拉可用</td><td>点单元格看选项</td><td>4 个带色标签都在</td></tr>
+  <tr><td>知识库可写</td><td>建一篇测试文档</td><td>父节点下可见、链接能打开</td></tr>
+  <tr><td>微信入口通</td><td>分享一条卡片</td><td>表里新增一行、链接完整</td></tr>
+  <tr><td>最小闭环</td><td>完整跑一条素材</td><td>闸门过 + 文档 + 表格 + 回读全通</td></tr>
+</table>
+
+<h2 id="vars">⚙️ 改配置：可变量地图（部署完先改这里，改完就能跑）</h2>
+<div class="rst">下面这张地图列出<b>整套流程里所有可换的地方</b>。部署时 Agent 会边做边问你填变量；装完之后，再回来按这张表把占位值换成<b>你自己的真实值</b>。改完 1、3、7（人设 / 选题 / 飞书坐标）这 3 件，流水线就能跑起来。</div>
+<h3>🧩 哪些能换、哪些别动（大白话版）</h3>
+<div class="lead">
+整套流程分两层：<b>引擎</b>（怎么抓内容、怎么转写、怎么质检、怎么入库）和 <b>配置</b>（给谁写、写什么主题、写多长、写到哪）。<br>
+<b>引擎是通用的，别动</b>；<b>配置才是你要改的</b>，全部列在下面「⚙️ 可变量地图」里，橙色虚线框标出来的就是。
+</div>
+<table>
+  <colgroup><col style="width:22%"><col style="width:32%"><col style="width:46%"></colgroup>
+  <tr><th>层</th><th>包含什么</th><th>怎么改 / 改哪里</th></tr>
+  <tr><td><b>🔒 引擎（不建议改）</b></td><td>抓内容、下载、Whisper 转写、qa_check 闸门、回写入库</td><td>改了容易整条断掉。真要调整，先跑一条素材验证</td></tr>
+  <tr><td><b>⚙️ 配置（随便改）</b></td><td>作者人设、选题黑白名单、热度阈值、信源、表名/token、脚本路径、定时时间、完成标签</td><td>按下一节地图逐项替换；<b>改人设改 roles.md，改选题改 SOP ⓪ 卡，改坐标改常量表</b></td></tr>
+  <tr><td><b>📄 稿件格式（可加）</b></td><td>文章三节 / 视频两段 / 图文两段；品牌类默认普通改写</td><td>要专属模板就在「③B 稿件章节模板」加一节，并同步 <code>qa_check.py</code> 的 <code>--type</code></td></tr>
+</table>
+<div class="rst"><b>一句话：</b>换给别人用 = 复制一份 + 改配置；换赛道 = 改选题黑白名单和信源；换语气 = 改 roles.md。<b>引擎不用碰。</b></div>
+
+<div class="varbox" id="varmap">
+<h3>⚙️ 可变量地图 —— 逐项替换（文中所有变量都用这个橙色虚线框高亮）</h3>
+<table>
+  <colgroup><col style="width:6%"><col style="width:20%"><col style="width:30%"><col style="width:44%"></colgroup>
+  <tr><th>#</th><th>可变量</th><th>底座占位值</th><th>改成什么 / 在哪改</th></tr>
+  <tr><td>1</td><td><b>作者人设与语气</b></td><td><span class="var">{作者}</span>（示例：某跨境操盘手 / 你的账号人设名）</td><td>整份重写 <code>references/roles.md</code>：姓名、行业背景、语气、口癖、禁忌、CTA 习惯。所有稿子按它写</td></tr>
+  <tr><td>2</td><td><b>内容栏目词表</b></td><td>Ai工具 / Ai知识科普 / 亚马逊 / TK / 独立站</td><td>你自己的栏目；改 SKILL.md 自动分类表 + 表里的下拉选项</td></tr>
+  <tr><td>3</td><td><b>选题黑白名单</b><br>（收什么 / 剔除什么）</td><td>示例：白=AI+办公提效；黑=跳舞/换脸/跑分/游戏/纯炫技</td><td>⓪ 周采集卡的「主题筛选」行 —— <b>整表替换成你的赛道</b>；判定顺序不变（热度→黑名单→白名单）</td></tr>
+  <tr><td>4</td><td><b>稿件格式</b></td><td>文章三节式 / 视频·图文两段式；<b>品牌案例类 = 普通文章改写</b></td><td>③B 稿件章节模板。<b>底座已初始化：{作者}的「五维品牌剖析模板」不保留</b>，需要专属模板自己加一节</td></tr>
+  <tr><td>5</td><td><b>热度阈值 / 时间窗</b></td><td>点赞 &gt;150、近 30 天</td><td>⓪ 周采集卡；改完同步改采集脚本与闸门配置</td></tr>
+  <tr><td>6</td><td><b>信源清单</b></td><td>量子位 / AIbase / Anthropic / 雨果跨境 / 亚马逊公告</td><td>⓪ 资讯周采集卡；只留实测可达的源，不可达的写进「别试」清单</td></tr>
+  <tr><td>7</td><td><b>飞书坐标</b></td><td>spreadsheet_token / 各 sheet_id / 知识库父节点</td><td>① 列名对照表 + ⑥ 常量表；<b>列名按你自己表头定位，不硬记字母</b></td></tr>
+  <tr><td>8</td><td><b>定时任务 ID / 时间</b></td><td>每周五 08:30 / 08:35 / 09:00（三条统一周五，按顺序错开）</td><td>⓪ 各卡片；改 automation prompt，不要误改同名任务</td></tr>
+  <tr><td>9</td><td><b>脚本目录与命令</b></td><td><code>{脚本目录}</code>（示例 <code>scripts/</code>）</td><td>③ 各链路卡的命令示例；放到你自己的目录后全局替换</td></tr>
+  <tr><td>10</td><td><b>完成情况标签</b></td><td>已改写待审核（橙 #ff8800）等 4 个</td><td>④ K 列四色标签；用 <code>sheets +dropdown-set</code> 重建下拉</td></tr>
+  <tr><td>11</td><td><b>浏览器 / 登录态 / 代理</b></td><td>Edge（<code>channel="msedge"</code>）+ storage_state</td><td>③ 链路卡；登录态放项目目录独立 profile，切勿指向真实浏览器 profile</td></tr>
+</table>
+<div class="rst"><b>改法建议：</b>① 先改 1、3、7（人设 / 选题 / 坐标）这三件，流水线就能跑；② 再按需要改 4 稿件格式；③ 引擎部分（抓、转写、闸门、入库）通用，<b>不建议改</b>。</div>
+</div>
+
+<h2 id="pipes">⓪ 入口流水线：素材是怎么自动进来的</h2>
+<div class="lead">
+<b>两条入口、四条流水线</b>：微信转发、对标博主周采集、跨境资讯周采集、AI 资讯周采集 —— <span class="bad">四条最后都要按 <span class="var">{作者}</span> 人设改写</span>，差别只在「素材怎么进来」。<br>
+前两条（微信转发、对标博主周采集）扒的是<b>完整素材</b>（要下载视频、转写）；后两条（两张资讯周采集）扒的是<b>新闻条目</b>：先写四列（日期/链接/内容/选题方向）+ 是否改写列（E）做初判，判「是」的当场走同一套改写链路。<br>
+<b>两条不可越过的线：</b>① 素材表「类型列（D）」决定产出形态，不看平台不看栏目；② 没过闸门不入库，空稿/瞎编稿不算完成。
+</div>
+
+<div class="flowbox">
+<svg viewBox="0 0 900 492" width="100%" role="img" aria-label="四条入口流水线，最后都要走作者人设改写">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#86909c"/>
+    </marker>
+  </defs>
+  <style>
+    .n{fill:#ffffff;stroke:#c9d3e0;stroke-width:1.2}
+    .nb{fill:#eaf2ff;stroke:#1f6feb;stroke-width:1.4}
+    .ng{fill:#eaf7f0;stroke:#0f9d58;stroke-width:1.4}
+    .ny{fill:#fdf6e7;stroke:#ff8800;stroke-width:1.2}
+    .np{fill:#f5f0ff;stroke:#ad82f7;stroke-width:1.2}
+    .nr{fill:#fdecec;stroke:#e5484d;stroke-width:1.4}
+    .t{font-size:14px;fill:#1d2129;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+    .ts{font-size:12px;fill:#6b7480;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+    .lbl{font-size:12px;fill:#6b7480;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+    .h{font-size:13px;fill:#1f6feb;font-weight:bold;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+  </style>
+
+  <text class="h" x="20" y="24">四条入口流水线 · 差异只在「素材怎么进来」，改写这一环四条共用</text>
+  <text class="ts" x="20" y="44">上面一行 = 入口；中间 = 各自的预处理；共用段 = ⚙️{作者}人设改写；底部 = 回写哪张表</text>
+
+  <!-- 入口 -->
+  <rect class="np" x="20"  y="60" width="200" height="56" rx="10"/>
+  <text class="t" x="120" y="83" text-anchor="middle">微信转发 / 发链接</text>
+  <text class="ts" x="120" y="102" text-anchor="middle">随时 · 手动触发</text>
+
+  <rect class="ng" x="240" y="60" width="200" height="56" rx="10"/>
+  <text class="t" x="340" y="83" text-anchor="middle">对标博主周采集</text>
+  <text class="ts" x="340" y="102" text-anchor="middle">每周五 09:00 · 串行慢跑</text>
+
+  <rect class="ny" x="460" y="60" width="200" height="56" rx="10"/>
+  <text class="t" x="560" y="83" text-anchor="middle">跨境资讯周采集</text>
+  <text class="ts" x="560" y="102" text-anchor="middle">每周五 08:30</text>
+
+  <rect class="nb" x="680" y="60" width="200" height="56" rx="10"/>
+  <text class="t" x="780" y="83" text-anchor="middle">AI 资讯周采集</text>
+  <text class="ts" x="780" y="102" text-anchor="middle">每周五 08:35</text>
+
+  <line x1="120" y1="116" x2="120" y2="146" stroke="#86909c" marker-end="url(#ar)"/>
+  <line x1="340" y1="116" x2="340" y2="146" stroke="#86909c" marker-end="url(#ar)"/>
+  <line x1="560" y1="116" x2="560" y2="146" stroke="#86909c" marker-end="url(#ar)"/>
+  <line x1="780" y1="116" x2="780" y2="146" stroke="#86909c" marker-end="url(#ar)"/>
+
+  <!-- 各自的预处理 -->
+  <rect class="n" x="20" y="150" width="420" height="66" rx="10"/>
+  <text class="t" x="230" y="177" text-anchor="middle">①② 采集 → 下载视频 / 取全文 → large-v3 转写</text>
+  <text class="ts" x="230" y="197" text-anchor="middle">周采集：近 30 天、小红书赞&gt;150、两段式取抖音、随机间隔 20-45 分钟</text>
+
+  <rect class="n" x="480" y="150" width="400" height="66" rx="10"/>
+  <text class="t" x="680" y="177" text-anchor="middle">③④ 入资讯表四列 + 是否改写列（E）初判</text>
+  <text class="ts" x="680" y="197" text-anchor="middle">日期 / 链接 / 内容 / 选题方向 → 判「是」立刻进改写</text>
+
+  <line x1="230" y1="216" x2="230" y2="246" stroke="#86909c" marker-end="url(#ar)"/>
+  <line x1="680" y1="216" x2="680" y2="246" stroke="#86909c" marker-end="url(#ar)"/>
+
+  <!-- 共用改写段 -->
+  <rect class="nr" x="20" y="250" width="860" height="72" rx="10"/>
+  <text class="t" x="450" y="277" text-anchor="middle">🔴 ⚙️{作者}人设改写 → qa_check 闸门 → 建飞书文档 → 回写表格</text>
+  <text class="ts" x="450" y="297" text-anchor="middle">四条流水线共用这一段：口语温和、禁照抄、禁编造数据、带 Hook+CTA；过不了闸门不入库</text>
+  <text class="ts" x="450" y="315" text-anchor="middle">稿件格式（底座默认）：资讯统一文章三节式；品牌案例类也走普通改写；详见 ③B</text>
+
+  <line x1="230" y1="322" x2="230" y2="352" stroke="#86909c" marker-end="url(#ar)"/>
+  <line x1="680" y1="322" x2="680" y2="352" stroke="#86909c" marker-end="url(#ar)"/>
+
+  <!-- 出口 -->
+  <rect class="ng" x="20" y="356" width="420" height="60" rx="10"/>
+  <text class="t" x="230" y="381" text-anchor="middle">素材表 {素材表ID} / 周采集表 {周采集表ID}</text>
+  <text class="ts" x="230" y="401" text-anchor="middle">贴文档列 + 完成情况列打橙色「已改写待审核」</text>
+
+  <rect class="nb" x="480" y="356" width="400" height="60" rx="10"/>
+  <text class="t" x="680" y="381" text-anchor="middle">跨境资讯表 {跨境资讯表ID} / AI 资讯表 {AI资讯表ID}</text>
+  <text class="ts" x="680" y="401" text-anchor="middle">不许交叉写；判「是」的在 F 列贴文档、G 列打橙标</text>
+
+  <!-- 区别提示 -->
+  <line x1="20" y1="436" x2="880" y2="436" stroke="#e3e8ef"/>
+  <text class="lbl" x="20" y="458">一句话：进来的路不同，出来的东西一样 —— 都是 ⚙️{作者} 口吻、可直接发的稿。</text>
+  <text class="lbl" x="20" y="474" fill="#e5484d">只有判为「否」的新闻条目（跑分融资政策、物流税务合规等）才不生成稿件；判「是」必须改写完。</text>
+</svg>
+</div>
+
+<h3>流水线 1 · 对标博主周采集（每周五 09:00 自动跑）</h3>
+<div class="card">
+<table>
+  <colgroup><col style="width:16%"><col style="width:84%"></colgroup>
+  <tr><th>触发</th><td>定时自动化（ID <code>{定时自动化ID}</code>），频率 ⬜ 待填（示例：每周五 09:00）。写入「对标博主视频扒取-复刻」表 <code>{周采集表ID}</code>。</td></tr>
+  <tr><td>输入</td><td>对标博主清单：平台列可能是多值（如「小红书,抖音」），按<b>包含</b>判断；博主抖音号读清单表「抖音链接（针对小红书）」字段，为空则降级只跑小红书。</td></tr>
+  <tr><td>主题筛选<br>（🔴 必做 · ⬜ 待填）</td><td>⬜ <b>这里由使用方填自己的赛道与黑白名单</b>，<b>底座不预置任何人的实际名单</b>。机制是固定的，词条是可变的：<br>
+  判定顺序：<b>先过阈值 → 再过黑名单（命中即扔）→ 再看白名单（没命中也不收）</b>。<br>
+  ✅ <b>白名单（要）</b>：⬜ 按你的赛道填，五类一组（核心品类词 / 工具词 / 场景词 / 人群词 / 工作流词）。<b>占位示例（部署时删掉）</b>：赛道词A / 赛道词B / 工具C / 场景D / 人群E。<br>
+  ❌ <b>黑名单（排除）</b>：⬜ 按你的赛道填。<b>占位示例（部署时删掉）</b>：纯娱乐炫技 / 与本赛道无关的热点 / 纯作品展示。<br>
+  阈值：⬜ 时间窗（示例：近 30 天）· ⬜ 点赞数（示例：>100）。<br>
+  被过滤掉的条目<b>必须登记到「已排除」清单并写明原因</b>，<span class="bad">不许静默丢弃</span>。数值先转 int 再比，缺失记 unknown 不是 0，字符串量（1.2万）先规范化。</td></tr>
+  <tr><td>两段式</td><td><b>第一段（小红书）</b>：拉每个博主近 ⬜ 天作品，筛点赞 &gt; ⬜ 的命中选题；<b>第二段（抖音）</b>：用命中笔记的标题/话题标签提取关键词，去该博主抖音作品列表里匹配<b>重合度最高</b>的那条视频取素材——只抓对得上的，不抓全量，并记录对应哪条小红书笔记。抖音<b>不设点赞阈值</b>（这些博主抖音数据弱，按赞筛会漏）；没命中小红书的博主不抓抖音。</td></tr>
+  <tr><td>⚙️ 反风控节奏<br>（🔴 禁并发）</td><td>一个博主走完全流程（抓→下载→转写→改写→建文档→入库）才换下一个；博主之间<b>随机间隔 20~45 分钟</b>，间隔期不发任何小红书请求；处理顺序每次随机打乱；单博主 ≤30 条/批、批间 60~90 秒、条间 3~8 秒抖动。遇验证码/登录态失效 → <span class="bad">立即停手</span>，记录状态回报，剩余博主本次跳过。</td></tr>
+  <tr><td>产出标准</td><td>每条命中素材建<b>一个</b>飞书文档（逐字稿+改写稿合并，标题=笔记原标题），链接贴结果表 <b>G 列（逐字稿+改写稿文档）</b>；<b>H 列（完成情况）必须打橙色「已改写待审核」，不留空</b>。</td></tr>
+</table>
+</div>
+
+<h3>流水线 2 &amp; 3 · 两张资讯周采集（每周五 08:30 / 08:35 自动跑，窗口 = 最近 7 天）</h3>
+<div class="card">
+<table>
+  <colgroup><col style="width:16%"><col style="width:42%"><col style="width:42%"></colgroup>
+  <tr><th></th><th>跨境资讯周采集（周五 08:30，ID <code>{定时自动化ID}</code>）</th><th>AI 资讯周采集（周五 08:35，ID <code>{定时自动化ID}</code>）</th></tr>
+  <tr><td>🔴 采集窗口</td><td colspan="2"><b>最近 7 天</b>（周频铁律）。改成周频后如果还用 24 小时窗口，一周跑一次会漏掉 6 天的新闻</td></tr>
+  <tr><td>🔴 改写上限</td><td colspan="2">周频候选远多于日频，判「是」的<b>每次最多改写 12 条</b>；超出的照常入表、E 列保持「是」、完成情况列留空，回报里单列「本周排队待改写」，下次优先处理</td></tr>
+  <tr><td>写哪张表</td><td>跨境资讯热点 <code>{跨境资讯表ID}</code>（只准写这张）</td><td>AI 资讯热点 <code>{AI资讯表ID}</code>（只准写这张）</td></tr>
+  <tr><td>⚙️ 信源</td><td>示例：全网检索跨境行业动态（雨果跨境 / 出海网 / 亚马逊公告）</td><td>已实测可用：量子位 RSS / AIbase 新闻列表 / Anthropic news；<span class="sub">Product Hunt、openai.com、机器之心、HN 本机不可达，别试</span></td></tr>
+  <tr><td>过滤规则</td><td><b>不过滤主题</b>，只剔纯广告/招商/课程/展会</td><td><b>宽进</b>：AI 新闻基本全收；只剔 4 类——非 AI、纯娱乐炫技、广告课程、站方垃圾；拿不准一律收</td></tr>
+  <tr><td>怎么入表</td><td colspan="2">先填四列：<b>日期 / 链接 / 内容 / 选题方向</b>，同批在<b>是否改写列（E）做 AI 初判</b>。<br><span class="sub">AI 表：能跟做复现的教程 / 办公提效 / 实操 = <b>是</b>；公司商业化营收、融资估值、跑分、宏观政策、行业八卦 = <b>否</b>。<br>跨境表：默认保留，只剔 6 类 = <b>否</b>——物流头程仓储、报关申报、审计、税务、知产侵权、法规合规认证（合规类写出来太干、口播不出来）；平台内容规则（如 TikTok Shop 视频规范）<b>不算合规类，保留</b>。<br>两套过滤规则不可混用。</span></td></tr>
+  <tr><td>🔴 判「是」<br>必须改写</td><td colspan="2"><b>不是「入表就完事」</b>。判「是」的条目<b>当场按 ⚙️<span class="var">{作者}</span> 人设走完整改写链路</b>：<br>
+  抓原文全文 → 写 <b>原文文字稿 + 改写长文稿（<b>≥2200 汉字</b>）+ 口播稿（220–280 字）</b> → 过闸门 → 建<b>一个</b>飞书文档 → <b>文档列贴卡片、完成情况列打「已改写待审核」</b>。闸门 <code>--type article</code>。<br>
+  🧩 <b>底座已初始化</b>：上游定制版里「跨境表走品牌剖析五段式」是个人定制，<b>这里两张表统一用文章三节式</b>。想给不同主题表配不同模板，在「③B 稿件章节模板」里自己加一节。<br>
+  <span class="bad">不许把「入表」当成交付，也不许只贴个链接不出稿。</span></td></tr>
+  <tr><td>初判的复核</td><td colspan="2">AI 初判是给用户复核的：<b>否→是</b>由用户点名，或用户直接要求某条改写 → 立刻补建文档；<b>是→否</b>用户撤回 → 删掉对应文档并清掉标签（当日已裁掉的例子：电动工具合规、欧盟 CRA、FCC 认证三条）。</td></tr>
+</table>
+</div>
+
+<h3>流水线 4 · 微信转发 / 对话发链接（手动，随时）</h3>
+<div class="card">
+<div class="rst" style="margin-bottom:8px">🔴🔴 <b>取源优先级：抖音 ＞ 小红书 ＞ 视频号</b>（2026-10-15 用户定，长期有效）。助理收到<b>小红书链接</b>时，<b>先拿标题 / 话题关键词去该博主的抖音号找一模一样的同条视频</b>，找到了就抓抖音；抖音没有才降级抓小红书；再没有才视频号。<b>建议发素材时直接发抖音链接</b>——抖音源更完整、有音轨、详情页风控少；小红书报 <b>300011 账号异常</b> → <b>挂起，回报用户补抖音链接，不反复重试</b>（反复刷会升级风控）。</div>
+<table>
+  <colgroup><col style="width:16%"><col style="width:84%"></colgroup>
+  <tr><th>触发</th><td>用户在微信发给助理 Bot，或直接在对话里发链接。<b>没有定时任务包裹</b>。<b>优先发抖音链接</b>；发来小红书链接时，先尝试在抖音找同条再决定取源。</td></tr>
+  <tr><td>处理</td><td>热度不设门槛、全部处理。登记进素材表 <code>{素材表ID}</code> → 走下面②的完整改写主流程。</td></tr>
+  <tr><td>标准</td><td>G 列（素材链接）必须有可用链接；没有就标「待补链接」，<span class="bad">不许凭标题编稿</span>。</td></tr>
+</table>
+</div>
+
+<h2 id="cols">① 表格列名对照（⚙️ 字母 = 中文，按你自己表头定位，别硬记字母）</h2>
+<div class="rst">下面这套列是<b>示例表</b>的结构。你的表列顺序可能不同——<b>先读表头再定位列</b>，不要照抄字母。</div>
+
+<h3>素材表 {素材表ID}「可复制笔记-自整理」</h3>
+<table>
+  <colgroup><col style="width:10%"><col style="width:26%"><col style="width:38%"><col style="width:26%"></colgroup>
+  <tr><th>列</th><th>中文名</th><th>装什么</th><th>谁写</th></tr>
+  <tr><td><b>D 列</b></td><td>类型</td><td>视频 / 图文 / 文章 / 访谈 —— 决定这篇怎么产出（③ 分流表）</td><td>助理判，不留空</td></tr>
+  <tr><td><b>F 列</b></td><td>标题</td><td>笔记/文章原标题</td><td>助理</td></tr>
+  <tr><td><b>G 列</b></td><td>素材链接</td><td>这条素材的原始链接</td><td>助理 / 用户</td></tr>
+  <tr><td><b>H 列</b></td><td>文档</td><td>改写稿的飞书文档卡片（点开即读）</td><td>AI 改完回写</td></tr>
+  <tr><td><b>I 列</b></td><td>是否符合（改写）</td><td>是否纳入改写范围</td><td><b>助理收录的一律自动打「符合」</b>，不筛选</td></tr>
+  <tr><td><b>J 列</b></td><td>迫切程度</td><td>优先级</td><td><b>只用户手动打，AI 永远不写</b></td></tr>
+  <tr><td><b>K 列</b></td><td>完成情况</td><td>四色下拉标签（见④）</td><td>AI 统一打橙色「已改写待审核」</td></tr>
+</table>
+
+<h3>其它两张表用到的列</h3>
+<table>
+  <colgroup><col style="width:26%"><col style="width:18%"><col style="width:56%"></colgroup>
+  <tr><th>表</th><th>列</th><th>用途</th></tr>
+  <tr><td>对标博主视频扒取-复刻 <code>{周采集表ID}</code></td><td>G 列（文档）<br>H 列（完成情况）</td><td>G 贴逐字稿+改写稿合并文档链接；H 打「已改写待审核」橙标，不留空</td></tr>
+  <tr><td>两张资讯表 <code>{跨境资讯表ID}</code> / <code>{AI资讯表ID}</code></td><td>是否改写列（E）<br>文档列（F）<br>完成情况列（G）</td><td>E：AI 初判「是/否」，用户复核；F：判「是」的贴改写稿文档卡片；G：打橙色「已改写待审核」</td></tr>
+</table>
+
+<h2 id="flow">② 改写主流程（每条走改写链路的素材都过这 7 步）</h2>
+<div class="flowbox">
+<svg viewBox="0 0 900 690" width="100%" role="img" aria-label="素材库改写主流程">
+  <defs>
+    <marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#86909c"/>
+    </marker>
+  </defs>
+  <style>
+    .n{fill:#ffffff;stroke:#c9d3e0;stroke-width:1.2}
+    .nb{fill:#eaf2ff;stroke:#1f6feb;stroke-width:1.4}
+    .ng{fill:#eaf7f0;stroke:#0f9d58;stroke-width:1.4}
+    .t{font-size:14px;fill:#1d2129;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+    .ts{font-size:12px;fill:#6b7480;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+    .lbl{font-size:12px;fill:#6b7480;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+  </style>
+
+  <!-- 主干 -->
+  <rect class="nb" x="330" y="20" width="240" height="54" rx="10"/>
+  <text class="t" x="450" y="43" text-anchor="middle">1 · 素材进来</text>
+  <text class="ts" x="450" y="61" text-anchor="middle">微信转发 / 对话发链接 / 周采集命中</text>
+
+  <line x1="450" y1="74" x2="450" y2="104" stroke="#86909c" marker-end="url(#ar2)"/>
+
+  <rect class="n" x="330" y="104" width="240" height="54" rx="10"/>
+  <text class="t" x="450" y="127" text-anchor="middle">2 · 登记 + 自动分类</text>
+  <text class="ts" x="450" y="145" text-anchor="middle">判平台/类型/栏目 · I 列（是否符合）打「符合」</text>
+
+  <line x1="450" y1="158" x2="450" y2="188" stroke="#86909c" marker-end="url(#ar2)"/>
+
+  <rect class="n" x="330" y="188" width="240" height="54" rx="10"/>
+  <text class="t" x="450" y="211" text-anchor="middle">3 · 抓全内容</text>
+  <text class="ts" x="450" y="229" text-anchor="middle">公众号取正文 / 小红书下视频 / 图文取全文</text>
+
+  <line x1="450" y1="242" x2="450" y2="272" stroke="#86909c" marker-end="url(#ar2)"/>
+
+  <rect class="nb" x="330" y="272" width="240" height="54" rx="10"/>
+  <text class="t" x="450" y="295" text-anchor="middle">4 · 看类型列（D）分流</text>
+  <text class="ts" x="450" y="313" text-anchor="middle">文章 / 视频 / 图文 / 品牌剖析</text>
+
+  <!-- 分支 -->
+  <line x1="450" y1="326" x2="450" y2="352" stroke="#86909c"/>
+  <line x1="160" y1="352" x2="740" y2="352" stroke="#86909c"/>
+  <line x1="160" y1="352" x2="160" y2="378" stroke="#86909c" marker-end="url(#ar2)"/>
+  <line x1="450" y1="352" x2="450" y2="378" stroke="#86909c" marker-end="url(#ar2)"/>
+  <line x1="740" y1="352" x2="740" y2="378" stroke="#86909c" marker-end="url(#ar2)"/>
+
+  <rect class="n" x="40" y="378" width="240" height="72" rx="10"/>
+  <text class="t" x="160" y="402" text-anchor="middle">视频</text>
+  <text class="ts" x="160" y="421" text-anchor="middle">下载 → large-v3 转写</text>
+  <text class="ts" x="160" y="438" text-anchor="middle">只出「说明 + 口播」</text>
+
+  <rect class="n" x="330" y="378" width="240" height="72" rx="10"/>
+  <text class="t" x="450" y="402" text-anchor="middle">文章</text>
+  <text class="ts" x="450" y="421" text-anchor="middle">公众号取全文</text>
+  <text class="ts" x="450" y="438" text-anchor="middle">出「长文 + 口播」</text>
+
+  <rect class="n" x="620" y="378" width="240" height="72" rx="10"/>
+  <text class="t" x="740" y="402" text-anchor="middle">图文</text>
+  <text class="ts" x="740" y="421" text-anchor="middle">取正文（不足则检索补齐）</text>
+  <text class="ts" x="740" y="438" text-anchor="middle">出「说明 + 口播」</text>
+
+  <line x1="160" y1="450" x2="160" y2="476" stroke="#86909c"/>
+  <line x1="450" y1="450" x2="450" y2="476" stroke="#86909c" marker-end="url(#ar2)"/>
+  <line x1="740" y1="450" x2="740" y2="476" stroke="#86909c"/>
+  <line x1="160" y1="476" x2="740" y2="476" stroke="#86909c"/>
+  <line x1="450" y1="476" x2="450" y2="502" stroke="#86909c" marker-end="url(#ar2)"/>
+
+  <rect class="n" x="330" y="502" width="240" height="54" rx="10"/>
+  <text class="t" x="450" y="525" text-anchor="middle">5 · ⚙️{作者}人设改写</text>
+  <text class="ts" x="450" y="543" text-anchor="middle">新 Hook / 重排结构 / 可执行 CTA</text>
+
+  <line x1="450" y1="556" x2="450" y2="586" stroke="#86909c" marker-end="url(#ar2)"/>
+
+  <rect class="nb" x="330" y="586" width="240" height="54" rx="10"/>
+  <text class="t" x="450" y="609" text-anchor="middle">6 · 闸门 qa_check</text>
+  <text class="ts" x="450" y="627" text-anchor="middle">不过就改，最多 2 轮</text>
+
+  <!-- 反馈 -->
+  <path d="M570,613 C650,613 660,560 580,545" fill="none" stroke="#e5484d" stroke-width="1.2" marker-end="url(#ar2)"/>
+  <text class="lbl" x="666" y="580" fill="#e5484d">不过 → 回去改</text>
+
+  <line x1="450" y1="640" x2="450" y2="662" stroke="#86909c" marker-end="url(#ar2)"/>
+
+  <rect class="ng" x="330" y="662" width="240" height="28" rx="8"/>
+  <text class="t" x="450" y="680" text-anchor="middle">7 · 入库飞书 + 回读确认</text>
+</svg>
+</div>
+
+<div class="step">
+  <span class="no">1</span><h4>素材进来</h4>
+  <div class="kv">入口：微信助理 Bot 转发 / WorkBuddy 对话直接发链接 / 每周五自动周采集命中。
+  <b>出口</b>：素材表一条新行，<b>G 列（素材链接）</b>有可用链接（没有就标「待补链接」，<span class="bad">不许凭标题编稿</span>）。</div>
+</div>
+
+<div class="step">
+  <span class="no">2</span><h4>登记 + 自动分类</h4>
+  <div class="kv">平台按域名判（mp.weixin→公众号，xiaohongshu→小红书，douyin→抖音…）；<b>类型必须自己判</b>，写进<b>D 列（类型）</b>，不留空、不写「待核实」；栏目按主题。
+  <b>I 列（是否符合）：助理收录的一律自动打「符合」</b>，不做内容筛选；<b>J 列（迫切程度）永远留空</b>，只有用户手打。
+  <b>出口</b>：D 列（类型）有确定值（后面所有动作都由它决定）。</div>
+</div>
+
+<div class="step">
+  <span class="no">3</span><h4>抓全内容</h4>
+  <div class="kv">公众号 → Edge 取 <code>#js_content</code>；小红书视频 → 下载带音轨档位；图文 → 取正文全文，纯图片笔记用检索补齐但不编造名称/数据。
+  <b>出口</b>：完整的原文文本（文章）或完整逐字稿（视频），<span class="bad">不是只取开头</span>。</div>
+</div>
+
+<div class="step">
+  <span class="no">4</span><h4>按类型列（D）分流</h4>
+  <div class="kv">四类形态见下面「③ 四条链路」。<b>出口</b>：确定这篇要写几段、每段多少字。</div>
+</div>
+
+<div class="step">
+  <span class="no">5</span><h4>⚙️ <span class="var">{作者}</span> 人设改写</h4>
+  <div class="kv">温暖朋友式、具体、口语、有分寸；从具体工作麻烦切入 → 卡点 → 工具/步骤 → 验收与边界 → 自然邀请。
+  不许把原作者经历写成 ⚙️{作者} 亲历，不许编造数据、收益、案例；轻吐槽每两三段最多一句，不用「一键爆款」这类保证性措辞。
+  <b>出口</b>：一份 md 初稿。</div>
+</div>
+
+<div class="step">
+  <span class="no">6</span><h4>闸门质检</h4>
+  <div class="kv">跑 <code>qa_check.py</code>：结构、字数、广告词、中英混杂、Hook/CTA、与原文重叠度。
+  <b>退出码 1 = 阻塞</b>，按报告自动改，最多 2 轮；仍不过 → 不发布，备注写「受阻：原因」，<b>K 列（完成情况）不打标签</b>。
+  <b>出口</b>：0 阻塞项的 md。</div>
+</div>
+
+<div class="step">
+  <span class="no">7</span><h4>入库 + 回读</h4>
+  <div class="kv">建文档（知识库父节点下，标题 = 原标题）→ 取 node_token → 回写 <b>H 列（文档卡片）</b>与 <b>K 列（完成情况）</b>打<span class="tag t4">已改写待审核</span> → 回读确认链接点得开、内容完整。
+  <b>出口</b>：表格里 H 有链接、K 有橙标。</div>
+</div>
+
+<h2 id="howto">③ 四条链路：怎么用 / 怎么做 / 做到什么程度</h2>
+
+<h3>A · 文章（公众号长文）</h3>
+<table>
+  <colgroup><col class="c1"><col class="c3"><col class="c4"></colgroup>
+  <tr><th>项目</th><th>怎么用（命令 / 入口）</th><th>怎么做 / 做到什么程度</th></tr>
+  <tr>
+    <td>取原文</td>
+    <td><code>python fetch_wx_edge.py &lt;url&gt; out.txt</code><br><span class="sub">Edge 取 #js_content，&lt;250 字退 body</span></td>
+    <td>拿到<b>全文</b>（不是摘要）。抓不到就换 MediaCrawler detail 补抓；仍不足 → 标受阻，不许凭标题写。</td>
+  </tr>
+  <tr>
+    <td>写稿</td>
+    <td>三章节 md：<code># 原标题</code> / <code>## 原文文字稿</code> / <code>## 改写长文稿</code> / <code>## 口播稿</code></td>
+    <td><b>长文 ≥2200 汉字</b>，书面体、带小标题和数据表格，可直接进公众号编辑器；与原文 4-gram 重叠 <b>≤30%</b>（&gt;20% 会告警，要继续重构句式）。</td>
+  </tr>
+  <tr>
+    <td>口播</td>
+    <td>同一 md 里的 <code>## 口播稿</code>，带 <code>[Hook｜x-y 秒]</code> 与 <code>[CTA｜x-y 秒]</code></td>
+    <td>活泼口语体，和长文互相独立（<span class="bad">不许把长文换个排版当口播</span>）；结尾 CTA 必须是具体动作（今晚就跑一遍 / 截图发我）。</td>
+  </tr>
+  <tr>
+    <td>闸门</td>
+    <td><code>qa_check.py &lt;md&gt; --type article</code></td>
+    <td>0 阻塞才进下一步；文章稿在文档里用四反引号围栏交付，本地不留底。</td>
+  </tr>
+</table>
+
+<h3>B · 视频（小红书 / 抖音 / 视频号）</h3>
+<table>
+  <colgroup><col class="c1"><col class="c3"><col class="c4"></colgroup>
+  <tr><th>项目</th><th>怎么用（命令 / 入口）</th><th>怎么做 / 做到什么程度</th></tr>
+  <tr>
+    <td>下载</td>
+    <td><code>python xhs_dl.py &lt;url&gt; &lt;outdir&gt; &lt;tag&gt;</code><br><span class="sub">Edge + xhs_storage_state.json</span></td>
+    <td>必须下<b>带音轨</b>的档位（小红书 EF4；EF5 无音轨会转写出空稿）。403 用 Playwright <code>ctx.request.get</code> 带 Referer。</td>
+  </tr>
+  <tr>
+    <td>转写</td>
+    <td><code>python transcribe_fw.py &lt;mp4&gt; &lt;outdir&gt; --model large-v3</code><br><span class="sub">Python 3.12 + HF_HUB_OFFLINE=1 + int8/cpu</span></td>
+    <td>完整逐字稿（时间戳版 + 纯文本版），覆盖整段音频；133 秒视频约 3 分钟。<b>禁用 tiny</b>。</td>
+  </tr>
+  <tr>
+    <td>写稿</td>
+    <td>两段 md：<code>## 说明文字</code> + <code>## 口播稿</code></td>
+    <td>说明 <b>60–120 汉字</b>（这条素材讲什么、怎么抄）；口播 <b>100–200 汉字</b>（约 30–40 秒）。<span class="bad">不许出现「原文要点 / 逐字稿 / 长文稿」章节</span>。</td>
+  </tr>
+  <tr>
+    <td>闸门</td>
+    <td><code>qa_check.py &lt;md&gt; --type koubo --sub video</code></td>
+    <td>0 阻塞；口播必须含 [Hook｜] 与 [CTA｜] 标记。</td>
+  </tr>
+</table>
+
+<h3>C · 图文（小红书图文 / 公众号图文）</h3>
+<table>
+  <colgroup><col class="c1"><col class="c3"><col class="c4"></colgroup>
+  <tr><th>项目</th><th>怎么用（命令 / 入口）</th><th>怎么做 / 做到什么程度</th></tr>
+  <tr>
+    <td>取内容</td>
+    <td>公众号同 A；小红书图文走网页正文；纯图片笔记用检索补同类做法</td>
+    <td>正文短（100–150 字）就写方法论，<span class="bad">不编造原文没有的名称和数据</span>。</td>
+  </tr>
+  <tr>
+    <td>写稿</td>
+    <td>两段 md：<code>## 说明文字</code> + <code>## 口播稿</code></td>
+    <td>说明 <b>120–200 汉字</b>（为什么值得抄 + 可抄的结构 + 一条落地提醒）；口播 <b>230–300 汉字</b>（约 50 秒）。不做长文稿。</td>
+  </tr>
+  <tr>
+    <td>闸门</td>
+    <td><code>qa_check.py &lt;md&gt; --type koubo --sub img</code></td>
+    <td>0 阻塞才入库。</td>
+  </tr>
+</table>
+
+<h3>D · 品牌案例 / 剖析类（底座默认 = 普通文章改写）</h3>
+<div class="rst">🧩 <b>已初始化</b>：上游定制版这里走的是「五维品牌营销全景拆解」专属模板（五维调研 + 融合长文 + 可抄清单），那是个人定制格式，<b>底座不保留</b>。品牌案例类在本底座里<b>按 A 模板普通改写</b>即可；需要专属模板的，在下面「③B」里新增一节并同步闸门类型。</div>
+<table>
+  <colgroup><col class="c1"><col class="c3"><col class="c4"></colgroup>
+  <tr><th>项目</th><th>怎么用（命令 / 入口）</th><th>怎么做 / 做到什么程度</th></tr>
+  <tr>
+    <td>定位</td>
+    <td>类型=文章（栏目是否叫「品牌剖析/案例拆解」只是标签，不影响产出）</td>
+    <td>就是<b>普通文章改写</b>，不做额外调研模板。</td>
+  </tr>
+  <tr>
+    <td>写稿</td>
+    <td>三章节 md：<code>## 原文文字稿</code> / <code>## 改写长文稿</code> / <code>## 口播稿</code></td>
+    <td>同 A 模板：长文 <b>≥2200 汉字</b>，重构结构与叙述顺序，不照抄、不编造事实。</td>
+  </tr>
+  <tr><td>闸门</td>
+    <td><code>qa_check.py &lt;md&gt; --type article</code></td>
+    <td>0 阻塞才入库（不需要 <code>--type brand</code>）。</td>
+  </tr>
+</table>
+
+<h3>访谈类</h3>
+<p>直接跳过 —— <span class="bad">必须由用户确认，不许自动判</span>。</p>
+
+<h3>入库三步（publish_row.py 丢了就按这个手工执行）</h3>
+<pre><code>1) lark-cli docs +create --parent-token {知识库父节点token} \
+      --title "&lt;原标题&gt;" --doc-format markdown --content @&lt;md&gt;
+
+2) lark-cli wiki +node-get --node-token &lt;docx_token&gt;      # 取 node_token
+
+3) lark-cli sheets +cells-set --spreadsheet-token {spreadsheet_token} \
+      --writes @writes.json
+   # H 列（文档）: rich_text mention（type=16, mention_token=node_token,
+   #        link=https://<你的飞书域名>.feishu.cn/wiki/&lt;node_token&gt;）← link 必带
+   # K 列（完成情况）: multiple_values:[{"value":"已改写待审核"}]</code></pre>
+<p class="sub">文档只建<b>一个</b>（逐字稿 + 改写稿合并），链接只贴 H 列（文档）；标题不带「【{作者}素材】」前缀；贴知识库形态 <code>/wiki/&lt;node&gt;</code>，不是 <code>/docx/&lt;token&gt;</code>。</p>
+
+<h2 id="tpl">③B 稿件章节模板：每一类稿分几节、每节怎么写、写到什么程度</h2>
+<p class="sub">这是「动笔之前」就要定的骨架。写完每节对着「怎么写 / 什么程度」自查，再进④的闸门。</p>
+
+<h3>A · 文章稿（类型列=文章）—— 文档四节</h3>
+<table>
+  <colgroup><col style="width:18%"><col style="width:30%"><col style="width:52%"></colgroup>
+  <tr><th>节</th><th>装什么</th><th>怎么写 / 写到什么程度</th></tr>
+  <tr><td>① 原文文字稿</td><td>原文全文（代码块包裹）</td><td>清洗掉网页导航、广告、推广位，<b>事实段落一个不删</b>；&lt;250 字的正文退回重抓，不许拿摘要凑。</td></tr>
+  <tr><td>② 改写长文稿</td><td>公众号成稿</td><td><b>≥2200 汉字</b>，书面体带小标题和数据表。开头新 Hook（从具体工作麻烦切入，不复述原文开头）→ 中段重排结构（先卡点、再步骤、再数据）→ 结尾验收与边界 + 自然 CTA。与原文 4-gram 重叠 <b>≤30%</b>；不编数据、不把原作者经历写成 ⚙️{作者} 亲历。</td></tr>
+  <tr><td>③ 口播稿</td><td>约 50 秒口播</td><td><b>220–280 汉字</b>，活泼口语体，开头 <code>[Hook｜0-5秒]</code>、结尾 <code>[CTA｜xx-xx秒]</code>（CTA 必须是具体动作：今晚就跑一遍/截图发我）。<b>和长文互相独立</b>，不许把长文换个排版当口播。</td></tr>
+  <tr><td>④ 信源表</td><td>只调研类稿件需要</td><td>补查的事实逐条列来源 + 可信度；查不到写「未采到」，不许编。</td></tr>
+</table>
+
+<h3>B · 视频稿（类型列=视频）—— 文档只有两节</h3>
+<table>
+  <colgroup><col style="width:18%"><col style="width:30%"><col style="width:52%"></colgroup>
+  <tr><th>节</th><th>装什么</th><th>怎么写 / 写到什么程度</th></tr>
+  <tr><td>① 说明文字</td><td>这条素材讲什么、怎么抄</td><td><b>60–120 汉字</b>：一句概括内容 + 一个值得抄的点。不是简介不是摘要。</td></tr>
+  <tr><td>② 口播稿</td><td>约 30–40 秒口播</td><td><b>100–200 汉字</b>，带 <code>[Hook｜]</code> 与 <code>[CTA｜]</code>。转写的逐字稿只是写稿原料，<span class="bad">不放进文档</span>——禁出现「原文要点 / 逐字稿 / 长文稿」章节。</td></tr>
+</table>
+
+<h3>C · 图文稿（类型列=图文）—— 文档只有两节</h3>
+<table>
+  <colgroup><col style="width:18%"><col style="width:30%"><col style="width:52%"></colgroup>
+  <tr><th>节</th><th>装什么</th><th>怎么写 / 写到什么程度</th></tr>
+  <tr><td>① 说明文字</td><td>为什么值得抄 + 怎么落地</td><td><b>120–200 汉字</b>：为什么值得抄 + 可抄的结构 + 一条落地提醒。</td></tr>
+  <tr><td>② 口播稿</td><td>约 50 秒口播</td><td><b>230–300 汉字</b>，带 Hook/CTA 标记。纯图片笔记不编造原文没有的名称和数据。</td></tr>
+</table>
+
+<h3>D · 品牌案例 / 剖析稿（🧩 底座已初始化 = 普通文章改写）</h3>
+<div class="rst">上游定制版的专属模板「五维品牌营销全景拆解」（五维调研 + 融合长文 + 可抄清单）是<b>个人定制</b>，底座<b>默认不启用</b>。这里按 <b>A 模板</b>普通改写即可。<br>
+如果你想加专属模板：<b>在下面再补一节</b>，写清「几节 / 每节写什么 / 字数 / 闸门类型」，并在 <code>qa_check.py</code> 里加对应 <code>--type</code>，再同步本页 ④ 的闸门表。</div>
+<table>
+  <colgroup><col style="width:18%"><col style="width:30%"><col style="width:52%"></colgroup>
+  <tr><th>节</th><th>装什么</th><th>怎么写 / 写到什么程度</th></tr>
+  <tr><td>① 原文文字稿</td><td>原文清洗后保留</td><td>只是引子和素材，不决定稿子结构。</td></tr>
+  <tr><td>② 改写长文稿</td><td>公众号成稿</td><td><b>≥2200 汉字</b>，重构叙述顺序与解释，不照抄、不编造事实；需要补查的事实附信源表。</td></tr>
+  <tr><td>③ 口播稿</td><td>约 50 秒</td><td>220–280 汉字，新 Hook + 新 CTA。</td></tr>
+</table>
+
+<h3>E · 资讯类稿件（两张资讯表判「是」专用，🧩 底座统一格式）</h3>
+<table>
+  <colgroup><col style="width:18%"><col style="width:30%"><col style="width:52%"></colgroup>
+  <tr><th>节</th><th>装什么</th><th>怎么写 / 写到什么程度</th></tr>
+  <tr><td>结构</td><td colspan="2"><b>和 A 模板一致</b>：原文文字稿 + 改写长文稿 + 口播稿。<b>必须结合原文</b>——原文本身是改写对象，不凭空换主题。</td></tr>
+  <tr><td>切口与标题</td><td colspan="2">⚙️ <b>按你的读者端口与岗位改写</b>（示例：跨境=亚马逊运营/独立站操盘/TK 卖家；AI=办公人群）——标题里点明读者是谁，正文落点「这对你的工作/生意意味着什么、抄哪个动作」。<b>这套读者画像也是可变量</b>，写进 <code>references/roles.md</code>。</td></tr>
+  <tr><td>程度</td><td colspan="2">长文 <b>≥2200 汉字</b>；查不到的事实标「未采到」；闸门 <code>qa_check.py --type article</code>。入库：文档列贴卡片、完成情况列打<span class="tag t4">已改写待审核</span>。</td></tr>
+</table>
+
+<h2 id="gate">④ 闸门与验收（做到什么程度才算完）</h2>
+<table>
+  <colgroup><col style="width:16%"><col style="width:26%"><col style="width:30%"><col style="width:28%"></colgroup>
+  <tr><th>链路</th><th>必须有的章节</th><th>字数硬指标（汉字）</th><th>其它必过项</th></tr>
+  <tr><td>文章</td><td>原文文字稿 / 改写长文稿 / 口播稿</td><td>长文 ≥2200</td><td>与原文重叠 ≤30%；口播含 Hook+CTA</td></tr>
+  <tr><td>视频</td><td>说明文字 / 口播稿（仅两段）</td><td>说明 60–120；口播 100–200</td><td>禁原文要点/逐字稿/长文稿章节；Hook+CTA</td></tr>
+  <tr><td>图文</td><td>说明文字 / 口播稿（仅两段）</td><td>说明 120–200；口播 230–300</td><td>同上</td></tr>
+  <tr><td>品牌案例/剖析</td><td>同「文章」：原文文字稿 / 改写长文稿 / 口播稿</td><td>长文 ≥2200</td><td>重叠 ≤30%；Hook+CTA（底座无专属模板）</td></tr>
+  <tr><td>全部</td><td>—</td><td>—</td><td>无引流词、无占位符、白名单外英文词 ≤8、一级标题 = 原标题</td></tr>
+</table>
+
+<h3>完成的定义（DoD）</h3>
+<ul>
+  <li>闸门 0 阻塞（<span class="bad">没过闸门不入库</span>）；</li>
+  <li>飞书文档建在知识库父节点下、标题等于原标题、内容完整；</li>
+  <li>表格 <b>H 列（文档）</b>挂上文档卡片、<b>K 列（完成情况）</b>打 <span class="tag t4">已改写待审核</span>；</li>
+  <li>回读确认链接点得开；</li>
+  <li>用户已有的 K 列值（已改成图文/视频/文章）<b>不覆盖</b>，只追加。</li>
+</ul>
+
+<h3>⚙️ 完成情况列标签（示例四个）</h3>
+<p><span class="tag t1">已改成图文</span> <span class="tag t2">已改成视频</span> <span class="tag t3">已改成文章</span> <span class="tag t4">已改写待审核</span>
+<span class="sub">稿件生成阶段统一打橙色「已改写待审核」。不要填「纯文字稿」（不在选项内、不上色）。</span></p>
+
+<h2 id="pit">⑤ 坑与排障</h2>
+<table>
+  <colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+  <tr><th>现象</th><th>原因 / 正确做法</th></tr>
+  <tr><td>小红书页面拿不到视频（NO_STREAM）</td><td>① <code>firstNoteId</code> 是 Vue ref，要取 <code>_value</code>；② <code>mediaV2.stream</code> 每档是<b>数组</b>，取 <code>[0]</code>；③ 只有 EF4 带音轨。都排除了还空 → 多半是 <code>xsec_token</code> 过期或笔记已删，搜一下标题确认。</td></tr>
+  <tr><td>下载 403</td><td>用 Playwright <code>ctx.request.get</code> 带 Referer，不用 requests。</td></tr>
+  <tr><td>闸门报一堆英文词</td><td>多半是代码块围栏错位（已修 <code>strip_code</code>）；确属工具专名就补白名单。</td></tr>
+  <tr><td>写 H 列（文档）报 <code>link is required for document mention</code></td><td>mention 的 rich_text 必须带 <code>link</code> 字段。</td></tr>
+  <tr><td>中文首字被吃掉</td><td>写值只用 <code>+cells-set</code>，不用 <code>+csv-put</code>。</td></tr>
+  <tr><td>文档挂错行</td><td>表格行号会漂移（助理新增行/排序）。批量前落快照，写完做「F 列（标题）vs H 列（文档）」比对。</td></tr>
+  <tr><td>公众号抓到验证页</td><td>改用 Edge 抓 <code>#js_content</code>（<code>fetch_wx_edge.py</code>）。</td></tr>
+  <tr><td>周采集触发验证码 / 登录态失效</td><td><b>立即停手</b>，不硬冲；记录状态回报，剩余博主本次跳过，绝不并发重试。</td></tr>
+  <tr><td>死链</td><td>见 sop.md「已知死链 / 受阻条目」：不重试、不编稿、不打 K 列标签（当前：第 2 行博主已删、第 50 行无链接）。</td></tr>
+</table>
+
+<h2 id="const">⑥ 常量表（⚙️ 全部为示例值，部署时替换）</h2>
+<div class="rst">这里每一项都是可变量：飞书坐标、自动化 ID、脚本目录、阈值、信源、浏览器登录态。<b>换成你自己的</b>；引擎部分（抓、转写、闸门、入库逻辑）不建议改。</div>
+<table>
+  <colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+  <tr><th>项</th><th>值</th></tr>
+  <tr><td>⚙️ 素材表 spreadsheet_token</td><td><span class="var">{spreadsheet_token}</span>（示例），sheet <span class="var">{素材表ID}</span>（示例表名「可复制笔记-自整理」）</td></tr>
+  <tr><td>⚙️ 周采集结果表</td><td>示例表名「对标博主视频扒取-复刻」<span class="var">{周采集表ID}</span>（示例 8 列，到 H 为止）</td></tr>
+  <tr><td>⚙️ 两张资讯表</td><td>跨境 <span class="var">{跨境资讯表ID}</span>（08:30 任务写）· AI <span class="var">{AI资讯表ID}</span>（08:35 任务写）——<b>不许交叉写</b></td></tr>
+  <tr><td>⚙️ 三个定时自动化 ID</td><td>部署后由 Agent 现场创建并回填，见 references/sop.md（底座模板不预置任何人的真实 ID）</td></tr>
+  <tr><td>⚙️ 知识库父节点</td><td><span class="var">{知识库父节点token}</span>（space_id <code>{space_id}</code>）</td></tr>
+  <tr><td>⚙️ 脚本目录</td><td><span class="var">{脚本目录}</span>（示例 <code>{工作目录}/scripts/</code>）</td></tr>
+  <tr><td>转写</td><td>Python 3.12 + <code>faster_whisper</code>（不是 <code>whisper</code>）+ large-v3 + int8/cpu + <code>HF_HUB_OFFLINE=1</code>；<b>禁 tiny</b></td></tr>
+  <tr><td>浏览器</td><td><b>只准 Edge</b>（<code>channel="msedge"</code>），登录态 <code>MediaCrawler/xhs_storage_state.json</code></td></tr>
+  <tr><td>⚙️ 周采集固定参数</td><td><span class="var">时间窗近 30 天 · 小红书赞 &gt;150 · 抖音不设阈值</span> · 两段式（小红书验证选题→抖音取素材）</td></tr>
+</table>
+
+<footer>
+本页与 <code>SKILL.md</code>、<code>references/sop.md</code>、<code>references/qa-gate.md</code> 同源；冲突时以 SKILL.md 为准，本页只负责「看得懂流程」。
+</footer>
+
+</main>
+</div>
+</div>
+<script>
+function copyPre(btn){
+  var pre = btn.closest('.copybox').querySelector('pre');
+  var txt = pre.innerText;
+  var ta = document.createElement('textarea');
+  ta.value = txt; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); btn.innerText='已复制 ✓'; }
+  catch(e){ btn.innerText='复制失败，手动选中'; }
+  document.body.removeChild(ta);
+  setTimeout(function(){ btn.innerText='复制这段话'; }, 2000);
+}
+</script>
+</body>
+</html>
