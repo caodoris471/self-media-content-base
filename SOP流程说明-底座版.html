@@ -195,7 +195,8 @@
 <h3 id="lazy">🅰️ 路线 A · 懒人版：复制这整段直接发给 Agent</h3>
 <div class="copybox"><div class="copyhd"><span>🚀 懒人版：复制这整段直接发给 Agent，它会按 8 步带你装完</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div>
 <pre><code>我要用「自媒体素材库自动化底座」skill 搭一套自动化选题流水线。
-请打开这个 skill 的 SOP 页（SOP流程说明-底座版.html），按开头「部署安装 Step 0-8」帮我逐部署，每步做完先回报结果、等我确认再进下一步。
+先把底座装到本机：git clone https://github.com/caodoris471/self-media-content-base 到 ~/.workbuddy/skills/ 下（上不了 GitHub 就找博主发安装包，解压到同一目录）。
+然后打开这个 skill 的 SOP 页（SOP流程说明-底座版.html），按开头「部署安装 Step 0-8」帮我逐步部署，每步做完先回报结果、等我确认再进下一步。
 
 ⚠️ 全程总规则（最重要）：凡是要填的变量——我的名字/账号归属、表名、token、路径、定时时间、赛道关键词——【一律不要用文档里的示例值】，先收集我的信息再动手：部署开始前，先一次性问我要「Step 1 变量清单」（见 SOP 页）里还没确定的项，我答完你再继续。
 
@@ -210,11 +211,22 @@ Step 7 提醒我：这一步我本人去扫码开通微信助理，不用来帮�
 Step 8 先跑一次最小闭环（我随后发你一条素材链接），跑通后再帮我建三个定时任务（跨境资讯周采集 每周五 08:30、AI 资讯周采集 每周五 08:35、对标博主周采集 每周五 09:00），prompt 里所有表名和 token 换成我这边的真实值，采集窗口必须写「最近 7 天」。
 
 全部做完后，把这张表给我：配置项 / 我的真实值，方便我以后改。</code></pre></div>
+<div class="rst">⚠️ <b>上不了 GitHub？</b>直接联系博主发整个安装包（文件夹 / zip），解压到 <code>~/.workbuddy/skills/</code> 即可，后面的步骤一模一样。</div>
 
 <div class="kv"><b>⚙️ Agent 会问你的变量（Step 1 变量清单）：</b>① skill 名字（如「小王-自媒体选题」）② 账号归属（你的名字/人设名）③ 内容赛道（AI 办公 / 跨境 / 美妆……决定选题黑白名单和信源）。其余 token、路径、定时时间由 Agent 在后续步骤里现做现拿，<b>不需要你提前准备</b>。</div>
 
 <h3 id="steps">🅱️ 路线 B · 一步一步版（Step 0–8，每步四段）</h3>
-<div class="rst">适合想搞清楚每步在干嘛、或装到一半出问题要对症排查的人。命令都让 Agent 敲，你只做「扫码、确认」这类给人做的操作。装完用下面那张<b>✅ 验收清单</b>逐项对照。</div>
+<div class="rst">适合想搞清楚每步在干嘛、或装到一半出问题要对症排查的人。<b>先做「前置」拿到底座</b>，再走 Step 0–8；命令都让 Agent 敲，你只做「扫码、确认」这类给人做的操作。装完用下面那张<b>✅ 验收清单</b>逐项对照。</div>
+<div class="step" id="s-pre">
+<div class="steptop"><span class="no">前</span><h4>拿到底座（从 GitHub 或安装包）</h4></div>
+<div class="why"><b>为什么先做这步：</b>本 skill 是一套模板文件，得先放进 WorkBuddy 的 <code>skills</code> 目录，Agent 才读得到，后面才能复制成你自己的版本。</div>
+<div class="do"><b>你要做的：</b>二选一——<b>能上 GitHub</b>：贴仓库链接让 Agent 一键 clone；<b>上不了 GitHub</b>：联系博主发安装包（文件夹 / zip），解压到 <code>~/.workbuddy/skills/</code>。</div>
+<div class="copybox"><div class="copyhd"><span>💬 前置 · 复制给 Agent</span><button class="copybtn" onclick="copyPre(this)">复制这段话</button></div><pre><code>帮我把这个 skill 从 GitHub 装到本机：
+https://github.com/caodoris471/self-media-content-base
+git clone 到 ~/.workbuddy/skills/ 下，装完检查 SKILL.md、SOP流程说明-底座版.html、扒取/ 三部分齐全。（上不了 GitHub 就把博主发的安装包解压到同一目录。）</code></pre></div>
+<div class="kv"><b class="done">✅ 怎么确认：</b>skills 目录下能看到这个 skill，且三部分齐全。</div>
+</div>
+
 <div class="step" id="s0">
 <div class="steptop"><span class="no">0</span><h4>确认采集底座已内置「博主视频全量扒取」</h4></div>
 <div class="why"><b>为什么先做这步：</b>本 skill 是「大脑」，只负责规则和改写；<b>真正去平台上把视频和正文抓下来、把语音转成文字的，是「博主视频全量扒取」这个 skill</b>（它内部带 MediaCrawler、各平台脚本和 Whisper 转写）。它是发动机，<b>已内置在本包 <code>扒取/</code> 目录</b>，后面所有视频类素材都靠它。</div>
