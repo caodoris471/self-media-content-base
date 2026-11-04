@@ -1,12 +1,17 @@
 ---
-name: 博主视频全量扒取
-description: 扒取任意平台博主账号的全部视频，按数据维度筛选（点赞/播放量/评论等阈值），下载后用 faster-whisper 本地转写并批量生成 6 模块逐字稿 MD + 改写脚本。**已打通 8 平台**（截至 2026-09-14）：**微信视频号（🟢 全自动，工具 HTTP API 批量拉 + 直链下载 + decrypt 解密，唯一入口 `scripts/wx_pipeline.py`；已验证：115 条清单/44 条实抓「示例博主」、172 条清单/近 7 天 5 条「示例博主」，见 `references/platform-wxchannels.md`）**/ 小红书（MediaCrawler + 分批抓取，29 条「示例博主」）/ B站（web search + 单视频 API + yt-dlp，3 条「示例博主」）/ 快手（MediaCrawler + login.py patch，17 条「示例博主」）/ YouTube（yt-dlp + 代理 + cookies.txt + yt-dlp-ejs，2 条「@示例博主」）/ TikTok（yt-dlp + Chrome-136 impersonate + 代理 + curl_cffi，9 条「@示例博主」）/ 抖音（MediaCrawler + Playwright + 扫码登录 + login.py patch，2 条「示例博主」）/ **Instagram（Playwright Edge 独立 profile + yt-dlp + cookies.txt，20 条「@示例博主」）**。强制流程：先 5 问（平台+账号 / 筛选维度 / 时间范围 / 脚本语言风格 / 是否需要保留登录态），若命中数为 0 自动建议放大时间范围（不擅自调整）。**🔴 六条硬铁律**：(1) **浏览器 Profile 保护**——任何平台登录只能用项目目录独立 profile，**绝对禁止** `--user-data-dir` 或 Playwright 指向真实 Chrome User Data / NTFS junction（否则会清空用户扩展）；(2) **改写脚本语言**——海外平台（YouTube/TikTok/Instagram）→ 英文，国内平台（B站/小红书/快手/视频号/抖音）→ 中文；(3) **改写脚本质量**——改写 ≠ 复制逐字稿，必须有新 Hook / 新口播 / 新 CTA；(4) **完整视频双落 mp4+m4a**——`-f "download/..."` 或 `-f "best[ext=mp4]"` 先 mp4、再 `-x --audio-format m4a` 抽音频，**禁止只下音频**；(5) **落盘用绝对路径**——subprocess yt-dlp `-o "xxx.mp4"` 必须 `str(VIDEO_DIR / "xxx.mp4")` 绝对路径，并 `cwd=VIDEO_DIR`，否则 mp4 会漏到项目根；(6) **JSON 数字字段转 int**——MediaCrawler jsonl 里 `liked_count`/`play_count` 等是字符串，直接 `int(v.get('k', 0) or 0)` 转 int，否则字符串比较会漏筛（2026-09-13 抖音「示例博主」实测 23,800 点赞被漏的教训）；(7) **视频号必须全自动 + 禁用 md_generator.py**——唯一入口 `scripts/wx_pipeline.py`，**禁止让用户手动点视频/点下载按钮**，MD 一律用 pipeline 内建 `step_md()` 按 SRT 逐段生成（`md_generator.py` 会把逐字稿合并成一坨、错挂博主名、被后台反复覆盖成占位版）。
-agent_created: true
+name: blogger-video-pipeline
+description: 对标博主视频批量采集 → 逐字稿与改写脚本。面向自媒体创作者、编导和内容研究者，按账号、时间与可用互动指标筛选视频，下载素材、本地转写、提炼观点并生成独立改写稿。提供视频号、小红书、抖音、B站、快手、YouTube、TikTok、Instagram 八平台流程；用于批量账号研究与脚本整理，执行前核实平台可达性。
+metadata:
+  agent_created: true
 ---
 
 # 博主视频全量扒取
 
-把某个博主的全部视频 → 按条件筛选 → 下载 → Whisper 转写 → 逐字稿 MD 的端到端流水线。
+面向自媒体创作者、短视频编导、内容运营与内容研究者，把对标账号的可访问视频按条件筛选、下载、本地转写，再整理成结构化逐字稿和独立改写脚本，减少逐条听写与手工归档。
+
+提供微信视频号、小红书、抖音、B站、快手、YouTube、TikTok、Instagram 八平台操作流程。历史实测见下表；开工前核实当前可达性与返回字段，“全量”以账号权限和接口可枚举范围为准。现有执行规则以 WorkBuddy 与 Windows 工具链为基础；其他宿主先检查工具适配。
+
+用户输入通常包括：平台 / 博主主页、时间范围、筛选指标、改写语言与语气、登录态保留选项。完整结果包括视频清单、MP4/M4A、SRT、结构化逐字稿和改写稿。若筛选无命中，只提出调整时间或阈值的建议，确认后再变更；不擅自降低条件。详细介绍与安装见 [README.md](README.md)。
 
 ## TL;DR（30 秒版）
 
